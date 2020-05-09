@@ -56,7 +56,7 @@ vqz = 0.
 # tstep in day, tsteps in second
 tstep = 0.001
 tsteps = 86400.*tstep
-tlimit = math.floor(365./tstep) # floor() 10.234 -> 10
+tlimit = math.floor(3650./tstep) # floor() 10.234 -> 10
 
 # Time list
 time = []
@@ -102,15 +102,12 @@ for t in range(0, tlimit, 1):
 
     # Add updated inclination to list
     # print(np.arctan(yp1/np.sqrt(xp1*xp1+zp1*zp1)))
-    ip.append(np.arctan(yp1/np.sqrt(xp1*xp1+zp1*zp1))*180/pi)
-    iq.append(np.arctan(yq1/np.sqrt(xq1*xq1+zq1*zq1))*180/pi)
+    ip.append(np.arctan(zp1/np.sqrt(xp1*xp1+yp1*yp1))*180/pi)
+    iq.append(np.arctan(zq1/np.sqrt(xq1*xq1+yq1*yq1))*180/pi)
 
     # Add updated eccentricity to list
-    eccentricityP = 1 - 5/3*(np.cos(np.arctan(yp1/np.sqrt(xp1*xp1+zp1*zp1))))*(np.cos(np.arctan(yp1/np.sqrt(xp1*xp1+zp1*zp1))))
-    if eccentricityP < 0:
-        print(xp1,yp1,zp1)
-    ep.append(1 - 5/3*(np.cos(np.arctan(yp1/np.sqrt(xp1*xp1+zp1*zp1))))*(np.cos(np.arctan(yp1/np.sqrt(xp1*xp1+zp1*zp1)))))
-    eq.append(1 - 5/3*(np.cos(np.arctan(yq1/np.sqrt(xq1*xq1+zq1*zq1))))*(np.cos(np.arctan(yq1/np.sqrt(xq1*xq1+zq1*zq1)))))
+    ep.append(1 - 5/3*(np.cos(np.arctan(zp1/np.sqrt(xp1*xp1+yp1*yp1))))**2)
+    eq.append(1 - 5/3*(np.cos(np.arctan(zq1/np.sqrt(xq1*xq1+yq1*yq1))))**2)
 
     # Distance from P to S
     Dps = np.sqrt(xp1 * xp1 + yp1 * yp1 + zp1 * zp1)
@@ -209,3 +206,5 @@ plt.xlabel('Y')
 plt.ylabel('Z')
 plt.grid()
 plt.show()
+
+# KE + PE = Energy of the orbit --> instantaneous eccentricity
