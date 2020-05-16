@@ -15,7 +15,7 @@ mSun = 1.98e30
 mJupiter = 1.90e27
 mEarth = 5.97e24
 # orbital distance of common planets in AU
-rJupiter = 778330000000*auperm
+rJupiter = 778330000000*auperm # 5.202 AU
 rEarth = 1.
 
 '''Masses'''
@@ -35,28 +35,44 @@ Tq = 1.
 # Current coordination of the planet p
 xp1 = rEarth*0.8
 yp1 = rEarth*0.1
+#xp1 = rEarth
+#yp1 = 0.
 zp1 = np.sqrt(rEarth**2-xp1**2-yp1**2)
+#rp = np.sqrt(xp1 ** 2 + yp1 ** 2 + zp1 ** 2)
+rp = rEarth
 
 # Current coordination of the planet q
 xq1 = rJupiter*0.7
 yq1 = rJupiter*0.1
-zq1 = np.sqrt(rJupiter**2-xp1**2-yp1**2)
+#xq1 = rJupiter
+#yq1 = 0.
+zq1 = np.sqrt(rJupiter**2-xq1**2-yq1**2)
+#rq = np.sqrt(xq1 ** 2 + yq1 ** 2 + zq1 ** 2)
+rq = rJupiter
 
 # Current velocity of the planet p         vpy = sqrt(GM/4)
 vpx = 0.
-vpy = np.sqrt(G * ms / rEarth)
-vpz = 0.
+vpy = np.sqrt((G * ms) / rEarth)*0.95
+vpz = np.sqrt((G * ms) / rEarth - vpy**2)
+#vpy = np.sqrt((G * ms) / rEarth)
+#vpz = 0.
+vp = np.sqrt(vpx ** 2 + vpy ** 2 + vpz ** 2)
 
 # Current velocity of the planet q         vpy = sqrt(GM/4)
 vqx = 0.
-vqy = np.sqrt(G * ms / rJupiter)
-vqz = 0.
+vqy = np.sqrt((G * ms) / rJupiter)*0.92
+vqz = np.sqrt((G * ms) / rJupiter - vqy**2)
+#vqy = np.sqrt((G * ms) / rJupiter)
+#vqz = 0.
+vq = np.sqrt(vqx ** 2 + vqy ** 2 + vqz ** 2)
 
-# Calculate position every tstep
-# tstep in day, tsteps in second
-tstep = 0.001
-tsteps = 86400.*tstep
-tlimit = math.floor(3650./tstep) # floor() 10.234 -> 10
+# Specific Angular Momentum of planet P and Q
+hp = np.sqrt((yp1 * vpz - vpy * zp1) ** 2 + (vpx * zp1 - xp1 * vpz) ** 2 + (xp1 * vpy - vpx * yp1) ** 2)
+hq = np.sqrt((yq1 * vqz - vqy * zq1) ** 2 + (vqx * zq1 - xq1 * vqz) ** 2 + (xq1 * vqy - vqx * yq1) ** 2)
+
+# Total energy of planet P and Q
+Ep = -G * ms * mp / (2 * rp)
+Eq = -G * ms * mq / (2 * rq)
 
 # Time list
 time = []
@@ -84,6 +100,11 @@ ep = []
 # eccentricity of planet Q list
 eq = []
 
+# Calculate position every tstep
+# tstep in day, tsteps in second
+tstep = 0.001
+tsteps = 86400.*tstep
+tlimit = math.floor(365./tstep) # floor() 10.234 -> 10
 
 for t in range(0, tlimit, 1):
 
@@ -101,13 +122,25 @@ for t in range(0, tlimit, 1):
     zq.append(zq1)
 
     # Add updated inclination to list
-    # print(np.arctan(yp1/np.sqrt(xp1*xp1+zp1*zp1)))
     ip.append(np.arctan(zp1/np.sqrt(xp1*xp1+yp1*yp1))*180/pi)
     iq.append(np.arctan(zq1/np.sqrt(xq1*xq1+yq1*yq1))*180/pi)
 
-    # Add updated eccentricity to list
-    ep.append(1 - 5/3*(np.cos(np.arctan(zp1/np.sqrt(xp1*xp1+yp1*yp1))))**2)
-    eq.append(1 - 5/3*(np.cos(np.arctan(zq1/np.sqrt(xq1*xq1+yq1*yq1))))**2)
+    # Add updated eccentricity to list \sqrt{1+E(2h^2/mGM^2))
+
+    # print(np.sqrt(1 + 2*Eq * (hq ** 2 / (mq * (G * ms) ** 2))))
+    # print(np.sqrt(1 + 2*Ep * (hp ** 2 / (mp * (G * ms) ** 2))))
+    # print(np.sqrt(1 + 2 * (0.5*mp*vp**2-G*ms*mp/rp) * (hp ** 2 / (mp * (G * ms) ** 2))))
+    # print(np.sqrt(1 + 2 * (0.5*mq*vq**2-G*ms*mq/rq) * (hq ** 2 / (mq * (G * ms) ** 2))))
+
+    # print("vp:"+str(vp)+", rp:"+str(rp))
+    # print("vq:"+str(rp)+", rq:"+str(rq))
+    # print("hp:"+str(hp))
+    # print("hq:"+str(hq))
+
+    # ep.append(np.sqrt(1 + 2*Ep * (hp**2/(mp*(G*ms)**2))))
+    # eq.append(np.sqrt(1 + 2*Eq * (hq**2/(mq*(G*ms)**2))))
+    ep.append(np.sqrt(1 + 2 * (0.5*mp*vp**2-G*ms*mp/rp) * (hp ** 2 / (mp * (G * ms) ** 2))))
+    eq.append(np.sqrt(1 + 2 * (0.5*mq*vq**2-G*ms*mq/rq) * (hq ** 2 / (mq * (G * ms) ** 2))))
 
     # Distance from P to S
     Dps = np.sqrt(xp1 * xp1 + yp1 * yp1 + zp1 * zp1)
@@ -154,6 +187,22 @@ for t in range(0, tlimit, 1):
     yq1 = yq1 + vqy * tsteps
     zq1 = zq1 + vqz * tsteps
 
+    # Update combine velocity of planet P and Q
+    vp = np.sqrt(vpx ** 2 + vpy ** 2 + vpz ** 2)
+    vq = np.sqrt(vqx ** 2 + vqy ** 2 + vqz ** 2)
+
+    # Update radius of orbit of planet P and Q
+    rp = np.sqrt(xp1 ** 2 + yp1 ** 2 + zp1 ** 2)
+    rq = np.sqrt(xq1 ** 2 + yq1 ** 2 + zq1 ** 2)
+
+    # Update total energy of planet P and Q
+    Ep = -G * ms * mp / (2 * rp)
+    Eq = -G * ms * mq / (2 * rq)
+
+    # Update specific angular momentum of planet P and Q , h = v x r
+    hp = np.sqrt((yp1*vpz-vpy*zp1)**2+(vpx*zp1-xp1*vpz)**2+(xp1*vpy-vpx*yp1)**2)
+    hq = np.sqrt((yq1*vqz-vqy*zq1)**2+(vqx*zq1-xq1*vqz)**2+(xq1*vqy-vqx*yq1)**2)
+
     # Update Time
     t += tsteps
 
@@ -179,6 +228,7 @@ plt.xlabel('Time')
 plt.ylabel('Eccentricity')
 plt.grid()
 plt.show()
+
 
 fig3 = plt.figure()
 plt.plot(xp,yp, 'b')
