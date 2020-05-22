@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 
+SimulationIntervalInYears = int(input())
+
 '''Constants'''
 # pi
 pi = 3.14159
@@ -40,31 +42,23 @@ Tq = 1.
 # Current coordination of the planet p
 xp1 = rp * 0.99
 yp1 = rp * 0.01
-# xp1 = rEarth
-# yp1 = 0.
 zp1 = np.sqrt(rp ** 2 - xp1 ** 2 - yp1 ** 2)
 
 # Current coordination of the planet q
 xq1 = rq * 0.98
 yq1 = rq * 0.01
-# xq1 = rJupiter
-# yq1 = 0.
 zq1 = np.sqrt(rq ** 2 - xq1 ** 2 - yq1 ** 2)
 
 # Current velocity of the planet p         vpy = sqrt(GM/4)
 vpx = 0.
 vpy = np.sqrt((G * ms) / rp) * 0.99
 vpz = np.sqrt((G * ms) / rp - vpy ** 2)
-# vpy = np.sqrt((G * ms) / rp)
-# vpz = 0.
 vp = np.sqrt(vpx ** 2 + vpy ** 2 + vpz ** 2)
 
 # Current velocity of the planet q         vpy = sqrt(GM/4)
 vqx = 0.
 vqy = np.sqrt((G * ms) / rq) * 0.98
 vqz = np.sqrt((G * ms) / rq - vqy ** 2)
-# vqy = np.sqrt((G * ms) / rq)
-# vqz = 0.
 vq = np.sqrt(vqx ** 2 + vqy ** 2 + vqz ** 2)
 
 # Specific Angular Momentum of planet P and Q
@@ -101,12 +95,6 @@ ep = []
 # eccentricity of planet Q list
 eq = []
 
-# /sqrt (1-e^2)
-edp = []
-
-# 1/cosi
-idelta = []
-
 # Lz
 Lz = []
 SumLz = 0.
@@ -115,7 +103,7 @@ SumLz = 0.
 # tstep in day, tsteps in second
 tstep = 1.
 tsteps = 86400. * tstep
-tlimit = math.floor(25*365. / tstep)  # floor() 10.234 -> 10
+tlimit = math.floor(SimulationIntervalInYears*365. / tstep)  # floor() 10.234 -> 10
 
 for t in range(0, tlimit, 1):
     # Add updated time to list
@@ -213,134 +201,34 @@ for t in range(0, tlimit, 1):
 
     # Update Time
     t += tsteps
-    print(t)
 
 LzAverage = SumLz / tlimit
-print(LzAverage)
 
 plt.figure()
 
 ax1 = plt.subplot2grid((2, 2), (0, 0), colspan = 1, rowspan = 1)
 plt.plot(time, ip, 'b')
 plt.plot(time, iq, 'r')
-ax1.set_title('Inclination versus Time')
-plt.xlabel('Time')
-plt.ylabel('Inclination')
+ax1.set_title('Inclination versus Time'+' - Simulation of '+str(SimulationIntervalInYears)+ ' Years')
+plt.xlabel('Time / Day')
+plt.ylabel('Inclination / Degree')
 plt.grid()
 
 ax2 = plt.subplot2grid((2, 2), (0, 1), colspan = 1, rowspan = 1)
 plt.plot(time, ep, 'b')
 plt.plot(time, eq, 'r')
-ax2.set_title('Eccentricity versus Time')
-plt.xlabel('Time')
+ax2.set_title('Eccentricity versus Time'+' - Simulation of '+str(SimulationIntervalInYears)+ ' Years')
+plt.xlabel('Time / Day')
 plt.ylabel('Eccentricity')
 plt.grid()
-
-'''
-ax3 = plt.subplot2grid((3, 2), (1, 0), colspan = 1, rowspan = 1)
-plt.plot(xp, yp, 'b')
-plt.plot(xq, yq, 'r')
-plt.xlabel('X')
-plt.ylabel('Y')
-plt.grid()
-
-ax4 = plt.subplot2grid((3, 2), (1, 1), colspan = 1, rowspan = 1)
-plt.plot(xp, zp, 'b')
-plt.plot(xq, zq, 'r')
-plt.xlabel('X')
-plt.ylabel('Z')
-plt.grid()
-
-ax5 = plt.subplot2grid((3, 2), (2, 0), colspan = 1, rowspan = 1)
-plt.plot(yp, zp, 'b')
-plt.plot(yq, zq, 'r')
-plt.xlabel('Y')
-plt.ylabel('Z')
-plt.grid()
-'''
 
 ax6 = plt.subplot2grid((2, 2), (1, 0), colspan = 2, rowspan = 1)
 plt.plot(time, Lz, 'g')
 ax6.axhline(LzAverage, ls = '--')
-ax6.set_title("Lz versus Time")
-ax6.annotate('Average Lz: ' + str(round(LzAverage,3)), xy=(9300,0.96))
-plt.xlabel('time')
-plt.ylabel('Lz')
-plt.grid()
-
-
-
-plt.show()
-
-figx = plt.figure()
-axx = figx.add_subplot()
-plt.plot(time, Lz, 'g')
-axx.axhline(LzAverage, ls = '--')
-axx.set_title("Lz versus Time")
-axx.annotate('Average Lz: ' + str(round(LzAverage,3)), xy=(9300,0.96))
-plt.xlabel('time')
+ax6.set_title("Lz versus Time"+' - Simulation of '+str(SimulationIntervalInYears)+ ' Years')
+ax6.annotate('Average Lz: ' + str(round(LzAverage,3)), xy=(SimulationIntervalInYears*365,0.96))
+plt.xlabel('Time / Day')
 plt.ylabel('Lz')
 plt.grid()
 
 plt.show()
-
-'''
-fig = plt.figure()
-
-# Inclination versus Time
-plt.plot(time, ip, 'b')
-plt.plot(time, iq, 'r')
-
-plt.xlabel('Time')
-plt.ylabel('Inclination')
-plt.grid()
-plt.show()
-
-fig2 = plt.figure()
-
-# Eccentricity versus Time
-plt.plot(time, ep, 'b')
-plt.plot(time, eq, 'r')
-
-plt.xlabel('Time')
-plt.ylabel('Eccentricity')
-plt.grid()
-plt.show()
-
-fig3 = plt.figure()
-plt.plot(xp, yp, 'b')
-plt.plot(xq, yq, 'r')
-
-plt.xlabel('X')
-plt.ylabel('Y')
-plt.grid()
-plt.show()
-
-fig4 = plt.figure()
-plt.plot(xp, zp, 'b')
-plt.plot(xq, zq, 'r')
-
-plt.xlabel('X')
-plt.ylabel('Z')
-plt.grid()
-plt.show()
-
-fig5 = plt.figure()
-plt.plot(yp, zp, 'b')
-plt.plot(yq, zq, 'r')
-
-plt.xlabel('Y')
-plt.ylabel('Z')
-plt.grid()
-plt.show()
-
-figx = plt.figure()
-plt.plot(idp, edp, 'b')
-plt.plot(idq, edq, 'r')
-
-plt.xlabel('1/cosi')
-plt.ylabel('/sqrt (1-e^2)')
-plt.grid()
-plt.show()
-
-'''
