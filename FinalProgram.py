@@ -16,8 +16,12 @@ mSun = 1.98e30
 # mass of common planets in kg
 mJupiter = 1.90e27
 mEarth = 5.97e24
+mNeptune = 1.0247e26
+mSaturn = 5.6846e26
 # orbital distance of common planets in AU
 rJupiter = 778330000000 * auperm  # 5.202 AU
+rNeptune = 4503443661000 * auperm
+rSaturn = 1433449370000 * auperm
 # rJupiter = 1.1
 rEarth = 1.
 
@@ -27,13 +31,13 @@ ms = mSun
 # mass of planet p
 mp = 0.
 # mass of planet q
-mq = mJupiter
+mq = mSaturn
 
 '''Orbit radius'''
 # radius of planet p
 rp = rEarth
 # radius of planet q
-rq = rJupiter
+rq = rSaturn
 # Period of planet P
 Tp = 1.
 # Period of planet Q
