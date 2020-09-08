@@ -3,6 +3,19 @@ import numpy as np
 import math
 
 SimulationIntervalInYears = int(input())
+SimulationPlanetQ = input()
+
+def getPlanetQMass(stringinput):
+    if stringinput == "jupiter":
+        return mJupiter
+    else:
+        return mSaturn
+
+def getPlanetQRadius(stringinput):
+    if stringinput == "jupiter":
+        return rJupiter
+    else:
+        return rSaturn
 
 '''Constants'''
 # pi
@@ -18,40 +31,47 @@ mJupiter = 1.90e27
 mEarth = 5.97e24
 mNeptune = 1.0247e26
 mSaturn = 5.6846e26
+mMercury = 3.3022e23
 # orbital distance of common planets in AU
-rJupiter = 778330000000 * auperm  # 5.202 AU
-rNeptune = 4503443661000 * auperm
-rSaturn = 1433449370000 * auperm
-# rJupiter = 1.1
-rEarth = 1.
+rJupiter = 5.203
+rNeptune = 30.10
+rSaturn = 9.582
+rEarth = 1.000
+rMercury = 0.460
 
-'''Masses'''
+'''Intialization of Object Masses'''
 # mass of the star
 ms = mSun
 # mass of planet p
-mp = 0.
+mp = mEarth
 # mass of planet q
-mq = mSaturn
+mq = getPlanetQMass(SimulationPlanetQ)
 
-'''Orbit radius'''
+'''Intialization of Object Orbit radius'''
 # radius of planet p
 rp = rEarth
 # radius of planet q
-rq = rSaturn
+rq = getPlanetQRadius(SimulationPlanetQ)
 # Period of planet P
 Tp = 1.
 # Period of planet Q
 Tq = 1.
 
-# Current coordination of the planet p
-xp1 = rp * 0.99
-yp1 = rp * 0.01
-zp1 = np.sqrt(rp ** 2 - xp1 ** 2 - yp1 ** 2)
+# Initial Inclination to X-Y plane of planet P orbit
+eccP = 10 / 180 * pi
+# Initial Inclination to X-Y plane planet Q orbit
+eccQ = -10 / 180 * pi
 
-# Current coordination of the planet q
-xq1 = rq * 0.98
-yq1 = rq * 0.01
-zq1 = np.sqrt(rq ** 2 - xq1 ** 2 - yq1 ** 2)
+# Current coordination of the planet p [10 degree to X-Y plane initially]
+xp1 = rp * 0.98475
+yp1 = rp * 0.01000
+zp1 = rp * 0.17368
+
+# Current coordination of the planet q [10 degree to X-Y plane initially]
+xq1 = rq * 0.98475
+yq1 = rq * 0.01000
+zq1 = rq * -0.17368
+
 
 # Current velocity of the planet p         vpy = sqrt(GM/4)
 vpx = 0.
@@ -93,6 +113,9 @@ ip = []
 # inclination of planet q list
 iq = []
 
+# mutal inclination between p and q
+ipq = []
+
 # eccentricity of planet P list
 ep = []
 
@@ -129,6 +152,7 @@ for t in range(0, tlimit, 1):
 
     ip.append(ip1 * 180 / pi)
     iq.append(iq1 * 180 / pi)
+    ipq.append(np.absolute(ip1-iq1) * 180 / pi)
 
     # Add updated eccentricity to list
     ep1sqr = 1 + (2 * (0.5 * vp ** 2 - G * ms / rp)) * (hp / (G * ms)) ** 2
@@ -208,31 +232,87 @@ for t in range(0, tlimit, 1):
 
 LzAverage = SumLz / tlimit
 
-plt.figure()
 
-ax1 = plt.subplot2grid((2, 2), (0, 0), colspan = 1, rowspan = 1)
-plt.plot(time, ip, 'b')
-plt.plot(time, iq, 'r')
-ax1.set_title('Inclination versus Time'+' - Simulation of '+str(SimulationIntervalInYears)+ ' Years')
-plt.xlabel('Time / Day')
-plt.ylabel('Inclination / Degree')
-plt.grid()
+def plotTripile():
+    plt.figure()
 
-ax2 = plt.subplot2grid((2, 2), (0, 1), colspan = 1, rowspan = 1)
-plt.plot(time, ep, 'b')
-plt.plot(time, eq, 'r')
-ax2.set_title('Eccentricity versus Time'+' - Simulation of '+str(SimulationIntervalInYears)+ ' Years')
-plt.xlabel('Time / Day')
-plt.ylabel('Eccentricity')
-plt.grid()
+    ax1 = plt.subplot2grid((2, 2), (0, 0), colspan = 1, rowspan = 1)
+    plt.plot(time, ipq, 'b', linewidth=0.5)
+    # plt.plot(time, ip, 'r')
+    # plt.plot(time, iq, 'r')
+    ax1.set_title('Inclination versus Time'+' - Simulation of '+str(SimulationIntervalInYears)+ ' Years')
+    plt.xlabel('Time / Day')
+    plt.ylabel('Inclination (i-total) / Degree')
+    plt.grid()
 
-ax6 = plt.subplot2grid((2, 2), (1, 0), colspan = 2, rowspan = 1)
-plt.plot(time, Lz, 'g')
-ax6.axhline(LzAverage, ls = '--')
-ax6.set_title("Lz versus Time"+' - Simulation of '+str(SimulationIntervalInYears)+ ' Years')
-ax6.annotate('Average Lz: ' + str(round(LzAverage,3)), xy=(SimulationIntervalInYears*365,0.96))
-plt.xlabel('Time / Day')
-plt.ylabel('Lz')
-plt.grid()
+    ax2 = plt.subplot2grid((2, 2), (0, 1), colspan = 1, rowspan = 1)
+    plt.plot(time, ep, 'b', linewidth=0.5)
+    plt.plot(time, eq, 'r', linewidth=0.5)
+    ax2.set_title('Eccentricities versus Time'+' - Simulation of '+str(SimulationIntervalInYears)+ ' Years')
+    plt.xlabel('Time / Day')
+    plt.ylabel('Eccentricity')
+    plt.grid()
 
-plt.show()
+    ax6 = plt.subplot2grid((2, 2), (1, 0), colspan = 2, rowspan = 1)
+    plt.plot(time, Lz, 'g', linewidth=0.5)
+    ax6.axhline(LzAverage, ls = '--')
+    ax6.set_title("Lz versus Time"+' - Simulation of '+str(SimulationIntervalInYears)+ ' Years')
+    ax6.annotate('Average Lz: ' + str(round(LzAverage,3)), xy=(SimulationIntervalInYears*365,0.96))
+    plt.xlabel('Time / Day')
+    plt.ylabel('Lz')
+    plt.grid()
+
+    plt.show()
+
+
+def plotEccentricity():
+    plt.figure()
+    ax2 = plt.subplot2grid((1, 1), (0, 0), colspan = 1, rowspan = 1)
+    plt.plot(time, ep, 'b', linewidth=0.5)
+    plt.plot(time, eq, 'r', linewidth=0.5)
+    ax2.set_title('Eccentricities of planetary orbits versus Time'+' - Simulation of '+str(SimulationIntervalInYears)+ ' Years')
+    plt.xlabel('Time / Day')
+    plt.ylabel('Eccentricity')
+    plt.grid()
+    plt.show()
+
+def plotMutalInc():
+    plt.figure()
+    ax1 = plt.subplot2grid((1, 1), (0, 0), colspan = 1, rowspan = 1)
+    plt.plot(time, ipq, 'g', linewidth=0.5)
+    ax1.set_title('Mutual Inclination between planetary orbits versus Time'+' - Simulation of '+str(SimulationIntervalInYears)+ ' Years')
+    plt.xlabel('Time / Day')
+    plt.ylabel('Inclination (i-total) / Degree')
+    plt.grid()
+    plt.show()
+
+def plotLz():
+    plt.figure()
+    ax6 = plt.subplot2grid((1, 1), (0, 0), colspan = 1, rowspan = 1)
+    plt.plot(time, Lz, 'g', linewidth=0.5)
+    ax6.axhline(LzAverage, ls = '--')
+    ax6.set_title("Kozai-Lidov Constant (Lz) versus Time"+' - Simulation of '+str(SimulationIntervalInYears)+ ' Years')
+    ax6.annotate('Average Lz: ' + str(round(LzAverage,3)), xy=(SimulationIntervalInYears*365,0.96))
+    plt.xlabel('Time / Day')
+    plt.ylabel('Lz')
+    plt.grid()
+    plt.show()
+
+def plotSeparateInclinations():
+    plt.figure()
+    ax1 = plt.subplot2grid((1, 1), (0, 0), colspan = 1, rowspan = 1)
+    plt.plot(time, ip, 'b', linewidth=0.5)
+    plt.plot(time, iq, 'r', linewidth=0.5)
+    ax1.set_title('Inclinations between planetary orbits and X-Y Plane versus Time'+' - Simulation of '+str(SimulationIntervalInYears)+ ' Years')
+    plt.xlabel('Time / Day')
+    plt.ylabel('Inclination (planetP=blue, planetQ=red) / Degree')
+    plt.grid()
+    plt.show()
+
+
+
+# plotTripile()
+plotEccentricity()
+plotMutalInc()
+plotLz()
+plotSeparateInclinations()
